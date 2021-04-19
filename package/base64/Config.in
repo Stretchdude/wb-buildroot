@@ -1,0 +1,7 @@
+config BR2_PACKAGE_BASE64
+       bool "base64"
+       help
+               base 64 lib in a header - staging only
+               https://github.com/tkislan/base64 but
+               here is used: https://github.com/Stretchdude/base64
+

@@ -1,0 +1,6 @@
+config BR2_PACKAGE_RESTCLIENTCPP
+       bool "restclientcpp"
+       help
+               static lib to allow easy rest api access as client
+
+

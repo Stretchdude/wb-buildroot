@@ -1,0 +1,6 @@
+config BR2_PACKAGE_LIBBLEPP
+       bool "libblepp"
+       help
+               libble++ bluetooth for c++ -  a c++-only (no dbus) ble interface as library
+
+

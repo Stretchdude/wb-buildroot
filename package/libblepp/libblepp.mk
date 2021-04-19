@@ -1,0 +1,12 @@
+LIBBLEPP_VERSION = v0.0.1-alpha 
+LIBBLEPP_SITE = $(call github,stretchdude,libblepp,$(LIBBLEPP_VERSION))
+LIBBLEPP_LICENSE =  GPL
+LIBBLEPP_LICENSE_FILES = COPYING
+LIBBLEPP_INSTALL_STAGING = YES
+LIBBLEPP_INSTALL_TARGET = YES
+LIBBLEPP_CONF_OPTS = 
+
+$(eval $(cmake-package))
+#$(eval $(autotools-package))
+
+
