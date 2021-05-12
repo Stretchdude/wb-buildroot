@@ -1,4 +1,7 @@
 initlrd=
 
-setenv bootargs "root=/dev/mmcblk0p3 rootwait resume=/dev/mmcblk0p2 resumewait rw \
-	init=/sbin/init "
+setenv bootargs "root=/dev/ram0 rootwait rw init=/sbin/init "
+
+
+# setenv bootargs "root=/dev/mmcblk0p3 rootwait resume=/dev/mmcblk0p2 resumewait rw \
+# 	init=/sbin/init "

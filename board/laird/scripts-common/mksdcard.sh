@@ -73,8 +73,8 @@ dd if=/dev/zero of=${DRIVE} bs=1KiB count=4 seek=$((49*1024)) status=none
 dd if=/dev/zero of=${DRIVE} bs=1KiB count=4 seek=$((305*1024)) status=none
 
 parted -s ${DRIVE} mklabel msdos unit MiB \
-    mkpart primary fat16 1 49 set 1 lba on set 1 boot on \
-    mkpart primary linux-swap 49 305 \
+    mkpart primary fat16 1 100 set 1 lba on set 1 boot on \
+    mkpart primary linux-swap 100 305 \
     mkpart primary ext4 305 100%
 
 [ $? -ne 0 ] && exit
@@ -107,13 +107,13 @@ sync
 umount -f ${MNT_BOOT} && rm -rf ${MNT_BOOT}
 
 # Copy files to rootfs partition
-mkdir -p ${MNT_ROOTFS}
-mount ${PART_ROOTFS} ${MNT_ROOTFS} || exit
-
-tar xf ${SRCDIR}/rootfs.tar -C ${MNT_ROOTFS}
-sync
-
-umount ${MNT_ROOTFS} && rm -rf ${MNT_ROOTFS}
+#mkdir -p ${MNT_ROOTFS}
+#mount ${PART_ROOTFS} ${MNT_ROOTFS} || exit
+#
+#tar xf ${SRCDIR}/rootfs.tar -C ${MNT_ROOTFS}
+#sync
+#
+#umount ${MNT_ROOTFS} && rm -rf ${MNT_ROOTFS}
 
 unmount_all ${DRIVE}
 

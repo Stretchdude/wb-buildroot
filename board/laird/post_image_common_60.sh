@@ -70,6 +70,15 @@ ALL_SWU_FILES="sw-description boot.bin u-boot.itb kernel.itb rootfs.bin u-boot-e
 if [ ${ENCRYPTED_TOOLKIT} -eq 0 ]; then
 	# Generate non-secured artifacts
 	echo "# entering ${BINARIES_DIR} for the next command"
+       (cd ${BINARIES_DIR} && rm rootfs.gz || true)
+       (cd ${BINARIES_DIR} && mkdir tmprootfs && cd tmprootfs \
+               && sudo tar vxf ../rootfs.tar \
+               && echo "entpackt" \
+               && find . -print0 | sudo cpio --null --create --verbose --format=newc | gzip --best > ../rootfs.gz \
+               && echo "repacked mit cpio" \
+               && cd .. && sudo rm -fr tmprootfs \
+        || exit 1)
+
 	(cd ${BINARIES_DIR} && ${mkimage} -f kernel.its kernel.itb && ${mkimage} -f u-boot.its u-boot.itb) || exit 1
 	cat "${BINARIES_DIR}/u-boot-spl-nodtb.bin" "${BINARIES_DIR}/u-boot-spl.dtb" > "${BINARIES_DIR}/u-boot-spl.bin"
 	if [ ${SD} -eq 0 ]; then

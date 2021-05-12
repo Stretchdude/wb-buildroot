@@ -42,6 +42,22 @@
 			};
 		};
 
+
+		 ramdisk-1 {
+                          description = "bens-ramdisk";
+                          data = /incbin/("./rootfs.gz");
+                          type = "ramdisk";
+                          arch = "arm";
+                          os = "linux";
+                          compression = "gzip";
+                          load  = <0x24100000>;
+                          entry = <0x24100000>; 
+                          hash {
+                                  algo = "sha256";
+                          };
+                  };
+
+
 		script {
 			description = "Boot script";
 			data = /incbin/("boot.scr");
@@ -62,6 +78,7 @@
 			description = "Summit Linux Kernel with FDT blob";
 			kernel = "kernel";
 			fdt = "fdt";
+			ramdisk = "ramdisk-1"
 			loadables = "script";
 
 			signature {
