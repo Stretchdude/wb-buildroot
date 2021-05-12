@@ -78,7 +78,7 @@
 			description = "Summit Linux Kernel with FDT blob";
 			kernel = "kernel";
 			fdt = "fdt";
-			ramdisk = "ramdisk-1"
+			ramdisk = "ramdisk-1";
 			loadables = "script";
 
 			signature {
