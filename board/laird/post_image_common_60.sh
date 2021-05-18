@@ -70,7 +70,8 @@ ALL_SWU_FILES="sw-description boot.bin u-boot.itb kernel.itb rootfs.bin u-boot-e
 if [ ${ENCRYPTED_TOOLKIT} -eq 0 ]; then
 	# Generate non-secured artifacts
 	echo "# entering ${BINARIES_DIR} for the next command"
-       (cd ${BINARIES_DIR} && rm rootfs.gz || true)
+       (cd ${BINARIES_DIR} && test -e ${BINARIES_DIR}/rootfs.gz &&  rm rootfs.gz || true)
+       (cd ${BINARIES_DIR} && test -e tmprootfs && rm -fr tmprootfs || true)
        (cd ${BINARIES_DIR} && mkdir tmprootfs && cd tmprootfs \
                && sudo tar vxf ../rootfs.tar \
                && echo "entpackt" \
