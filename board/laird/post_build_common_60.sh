@@ -12,10 +12,6 @@ echo "${BR2_LRD_PRODUCT^^} POST BUILD script: starting..."
 
 [[ "${BUILD_TYPE}" == *sd ]] && SD=1 || SD=0
 
-# Determine if encrypted image being built
-grep -qF "BR2_PACKAGE_LRD_ENCRYPTED_STORAGE_TOOLKIT=y" ${BR2_CONFIG} \
-	&& ENCRYPTED_TOOLKIT=1 || ENCRYPTED_TOOLKIT=0
-
 # remove the resolv.conf.  Network Manager will create the appropriate file and
 # link on startup.
 rm -f "${TARGET_DIR}/etc/resolv.conf"
@@ -42,9 +38,6 @@ echo -ne \
 # Copy the product specific rootfs additions, strip host user access control
 rsync -rlptDWK --no-perms --exclude=.empty "${BOARD_DIR}/rootfs-additions/" "${TARGET_DIR}"
 
-grep -q 'BR2_DEFCONFIG=.*_fips_dev_defconfig' ${BR2_CONFIG} && \
-	rsync -rlptDWK --no-perms --exclude=.empty "${BOARD_DIR}/rootfs-additions-fips-dev/" "${TARGET_DIR}"
-
 # Do not update access time in flash/card
 sed -i 's/auto rw/auto,noatime rw/g' ${TARGET_DIR}/etc/fstab
 
@@ -53,18 +46,24 @@ awk '{if ($6 == 1 && $4 == "ro") $6=0}; 1' ${TARGET_DIR}/etc/fstab > ${TARGET_DI
 mv -f ${TARGET_DIR}/etc/fstab.tmp ${TARGET_DIR}/etc/fstab
 
 if [ ${SD} -ne 0 ]; then
-	grep -q "/dev/mmcblk0p2" ${TARGET_DIR}/etc/fstab ||\
-		echo '/dev/mmcblk0p2 swap swap defaults,noatime 0 0' >> ${TARGET_DIR}/etc/fstab
+#	grep -q "/dev/mmcblk0p2" ${TARGET_DIR}/etc/fstab ||\
+#		echo '/dev/mmcblk0p2 swap swap defaults,noatime 0 0' >> ${TARGET_DIR}/etc/fstab
 
-	grep -q "/dev/mmcblk0p1" ${TARGET_DIR}/etc/fstab ||\
-		echo '/dev/mmcblk0p1 /boot vfat defaults,noatime 0 0' >> ${TARGET_DIR}/etc/fstab
+#	grep -q "/dev/mmcblk0p1" ${TARGET_DIR}/etc/fstab ||\
+#		echo '/dev/mmcblk0p1 /boot vfat defaults,noatime 0 0' >> ${TARGET_DIR}/etc/fstab
 
 	sed -i 's,^/dev/mtd,# /dev/mtd,' ${TARGET_DIR}/etc/fw_env.config
 else
 	sed -i 's,^/boot/,# /boot/,' ${TARGET_DIR}/etc/fw_env.config
 fi
 
-if [ ${ENCRYPTED_TOOLKIT} -ne 0 ] || [ "${BUILD_TYPE}" == ig60 ]; then
+######## ben4ctc #####
+# mount -t tmpfs udev /dev
+# echo "udev	/dev	tmpfs	defaults	0	0" >> ${TARGET_DIR}/etc/fstab
+sed '1 a udev      /dev    tmpfs   defaults        0       0' ${TARGET_DIR}/etc/fstab
+
+
+if grep -qF "BR2_PACKAGE_LRD_ENCRYPTED_STORAGE_TOOLKIT=y" ${BR2_CONFIG}; then
 	# Securely mount /var on tmpfs
 	grep -q "^tmpfs" ${TARGET_DIR}/etc/fstab &&
 		sed -ie '/^tmpfs/ s/mode=1777 /mode=1777,noexec,nosuid,nodev,noatime /' ${TARGET_DIR}/etc/fstab ||
@@ -88,37 +87,21 @@ for f in ${TARGET_DIR}/etc/NetworkManager/system-connections/* ; do
 done
 
 # Make sure dispatcher files have proper attributes
-[ -d ${TARGET_DIR}/etc/NetworkManager/dispatcher.d ] && \
-	find ${TARGET_DIR}/etc/NetworkManager/dispatcher.d -type f -exec chmod 700 {} \;
-
-# Remove bluetooth support when BlueZ 5 not present
-if [ ! -x ${TARGET_DIR}/usr/bin/btattach ]; then
-	rm -rf ${TARGET_DIR}/etc/bluetooth
-	rm -f ${TARGET_DIR}/etc/udev/rules.d/80-btattach.rules
-	rm -f ${TARGET_DIR}/usr/lib/systemd/system/btattach.service
-	rm -f ${TARGET_DIR}/usr/bin/bt-service.sh
-fi
-
-# Remove autoloading cryptodev module when not present
-[ -n "$(find "${TARGET_DIR}/lib/modules/" -name cryptodev.ko)" ] || \
-	rm -f "${TARGET_DIR}/etc/modules-load.d/cryptodev.conf"
-
-# Clean up Python, Node cruft we don't need
-rm -f "${TARGET_DIR}/usr/lib/python2.7/ensurepip/_bundled/*.whl"
-rm -f "${TARGET_DIR}/usr/lib/python3.7/ensurepip/_bundled/*.whl"
-rm -f "${TARGET_DIR}/usr/lib/python2.7/distutils/command/*.exe"
-rm -f "${TARGET_DIR}/usr/lib/python3.7/distutils/command/*.exe"
-rm -f "${TARGET_DIR}/usr/lib/python3.7/site-packages/setuptools/*.exe"
-[ -d "${TARGET_DIR}/usr/lib/node_modules" ] && \
-	find "${TARGET_DIR}/usr/lib/node_modules" -name '*.md' -exec rm -f {} \;
-rm -rf "${TARGET_DIR}/var/www/swupdate"
-rm -rf "${TARGET_DIR}/usr/share/gobject-introspection-1.0/"
+for f in ${TARGET_DIR}/etc/NetworkManager/dispatcher.d/* ; do
+	if [ -f "${f}" ] ; then
+		chmod 700 "${f}"
+	fi
+done
 
 if [ "${BUILD_TYPE}" != ig60 ]; then
 
 # Path to common image files
 CCONF_DIR="$(realpath board/laird/configs-common/image)"
 CSCRIPT_DIR="$(realpath board/laird/scripts-common)"
+
+# Determine if encrypted image being built
+grep -qF "BR2_PACKAGE_LRD_ENCRYPTED_STORAGE_TOOLKIT=y" ${BR2_CONFIG} \
+	&& ENCRYPTED_TOOLKIT=1 || ENCRYPTED_TOOLKIT=0
 
 # Configure keys, boot script, and SWU tools when using encrypted toolkit
 if [ ${ENCRYPTED_TOOLKIT} -ne 0 ]; then
