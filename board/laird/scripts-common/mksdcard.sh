@@ -26,14 +26,18 @@ fi
 case "${ARG}" in
     sd*)
         PART_BOOT=${DRIVE}1
-        PART_SWAP=${DRIVE}2
-        PART_ROOTFS=${DRIVE}3
+        #PART_SWAP=${DRIVE}2
+        #PART_ROOTFS=${DRIVE}3
+	PART_CONF=${DRIVE}2
+	PART_LOG=${DRIVE}3
         ;;
 
     mmcblk*)
         PART_BOOT=${DRIVE}p1
-        PART_SWAP=${DRIVE}p2
-        PART_ROOTFS=${DRIVE}p3
+	PART_CONF=${DRIVE}p2
+	PART_LOG=${DRIVE}p3
+#        PART_SWAP=${DRIVE}p2
+#        PART_ROOTFS=${DRIVE}p3
         ;;
 
     *)
@@ -86,14 +90,15 @@ echo "[Making file systems...]"
 
 # Format newly created partitions
 mkfs.vfat -F 16 -n BOOT ${PART_BOOT} >/dev/null
-mkswap -L swap ${PART_SWAP} >/dev/null
-mkfs.ext4 -q -L rootfs ${PART_ROOTFS} -E lazy_itable_init=0,lazy_journal_init=0
+#mkswap -L swap ${PART_SWAP} >/dev/null
+mkfs.ext3 -q -L config ${PART_CONF} -E lazy_itable_init=0,lazy_journal_init=0
+mkfs.ext3 -q -L log ${PART_LOG} -E lazy_itable_init=0,lazy_journal_init=0
 sync
 
 echo "[Copying files...]"
 
 MNT_BOOT=/mnt/${PART_BOOT##*/}
-MNT_ROOTFS=/mnt/${PART_ROOTFS##*/}
+#MNT_ROOTFS=/mnt/${PART_ROOTFS##*/}
 
 # Copy files to boot partition
 mkdir -p ${MNT_BOOT}
