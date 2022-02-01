@@ -78,8 +78,8 @@ dd if=/dev/zero of=${DRIVE} bs=1KiB count=4 seek=$((305*1024)) status=none
 
 parted -s ${DRIVE} mklabel msdos unit MiB \
     mkpart primary fat16 1 100 set 1 lba on set 1 boot on \
-    mkpart primary linux-swap 100 305 \
-    mkpart primary ext4 305 100%
+    mkpart primary ext4 100 800 \
+    mkpart primary ext4 801 100%
 
 [ $? -ne 0 ] && exit
 
