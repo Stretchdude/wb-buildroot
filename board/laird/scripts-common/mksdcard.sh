@@ -73,8 +73,9 @@ echo "[Partitioning ${DRIVE}...]"
 # Wipe MBR and Partition Table
 dd if=/dev/zero of=${DRIVE} bs=512 count=1 status=none
 dd if=/dev/zero of=${DRIVE} bs=1KiB count=1 seek=1024 status=none
-dd if=/dev/zero of=${DRIVE} bs=1KiB count=4 seek=$((49*1024)) status=none
-dd if=/dev/zero of=${DRIVE} bs=1KiB count=4 seek=$((305*1024)) status=none
+dd if=/dev/zero of=${DRIVE} bs=1KiB count=4 seek=$((100*1024)) status=none
+dd if=/dev/zero of=${DRIVE} bs=1KiB count=4 seek=$((800*1024)) status=none
+dd if=/dev/zero of=${DRIVE} bs=1KiB count=4 seek=$((801*1024)) status=none
 
 parted -s ${DRIVE} mklabel msdos unit MiB \
     mkpart primary fat16 1 100 set 1 lba on set 1 boot on \
